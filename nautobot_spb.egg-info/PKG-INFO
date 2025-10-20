@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: nautobot-spb
+Version: 0.1
+Summary: SPB Support for Nautobot
+Author-email: LINA <linaouali547@gmail.com>
+Requires-Dist: nautobot>=2.4

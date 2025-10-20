@@ -1,0 +1,13 @@
+[project]
+name = "nautobot-spb"
+version = "0.1"
+description = "SPB Support for Nautobot"
+authors = [{ name = "LINA", email = "linaouali547@gmail.com" }]
+dependencies = ["nautobot>=2.4"]
+
+[project.entry-points."nautobot.plugins"]
+nautobot_spb = "nautobot_spb"
+
+[tool.nautobot]
+min_version = "2.4.0"
+
