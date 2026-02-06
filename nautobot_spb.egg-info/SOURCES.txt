@@ -1,9 +1,12 @@
 pyproject.toml
 nautobot_spb/__init__.py
 nautobot_spb/admin.py
+nautobot_spb/extend.py
+nautobot_spb/features.py
+nautobot_spb/forms.py
 nautobot_spb/models.py
 nautobot_spb/navigation.py
-nautobot_spb/plugin.py
+nautobot_spb/plugin_old.py
 nautobot_spb/tables.py
 nautobot_spb/urls.py
 nautobot_spb/views.py

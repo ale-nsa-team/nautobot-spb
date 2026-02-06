@@ -10,13 +10,46 @@ from .models import (
     SPB_IPVPN_Redist,
 )
 
-# Register each model so they appear in Admin
+from nautobot.dcim.models import Device
+
+
+# ============================================================================
+# Inline ISIS-SPB configuration (shown only for control BVLAN)
+# ============================================================================
+class SPBISISInline(admin.StackedInline):
+    model = SPB_ISIS
+    extra = 0
+    fields = [
+        "device",
+        "bridge_priority",
+        "spf_wait",
+        "lsp_wait",
+        "graceful_restart",
+    ]
+    can_delete = False
+    show_change_link = True
+
+
+# ============================================================================
+# BVLAN Admin
+# ============================================================================
 @admin.register(SPB_BVLAN)
 class SPBBVLANAdmin(admin.ModelAdmin):
-    list_display = ("bvlan_id", "name", "admin_state")
+    list_display = ("bvlan_id", "name", "admin_state", "control")
     search_fields = ("bvlan_id", "name")
 
+    inlines = []
 
+    def get_inlines(self, request, obj=None):
+        """Display ISIS inline section only if control=True."""
+        if obj and obj.control:
+            return [SPBISISInline]
+        return []
+
+
+# ============================================================================
+# Other models (unchanged)
+# ============================================================================
 @admin.register(SPB_Service)
 class SPBServiceAdmin(admin.ModelAdmin):
     list_display = ("service_id", "isid", "bvlan", "admin_state")
@@ -40,7 +73,7 @@ class SPBInterfaceAdmin(admin.ModelAdmin):
 
 @admin.register(SPB_ISIS)
 class SPBISISAdmin(admin.ModelAdmin):
-    list_display = ("device", "bridge_priority", "control_bvlan")
+    list_display = ("device", "bridge_priority", "bvlan")
 
 
 @admin.register(SPB_IPVPN_Bind)
@@ -51,4 +84,3 @@ class SPBIPVPNBindAdmin(admin.ModelAdmin):
 @admin.register(SPB_IPVPN_Redist)
 class SPBIPVPNRedistAdmin(admin.ModelAdmin):
     list_display = ("source_vrf", "source_isid", "dest_isid", "all_routes")
-

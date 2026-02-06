@@ -1,0 +1,37 @@
+{% extends 'generic/object_edit.html' %}
+{% load form_helpers %}
+
+{% block form %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>SPB Topology</strong>
+    </div>
+    <div class="panel-body">
+        {% render_field form.name %}
+        {% render_field form.description %}
+        {% render_field form.control_bvlan_id %}
+        {% render_field form.data_bvlan_ids %}
+        {% render_field form.devices %}
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>SPB Interface Configuration</strong>
+    </div>
+    <div class="panel-body">
+	{% render_field form.related_interfaces %}
+        {% render_field form.topology_interface_type %}
+        {% render_field form.topology_hello_interval %}
+        {% render_field form.topology_hello_multiplier %}
+        {% render_field form.topology_metric %}
+        {% render_field form.topology_priority %}
+        {% render_field form.topology_admin_state %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+    {{ block.super }}
+{% endblock %}
+

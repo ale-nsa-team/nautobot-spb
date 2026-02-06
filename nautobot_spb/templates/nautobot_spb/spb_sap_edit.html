@@ -1,0 +1,118 @@
+{% extends "generic/object_edit.html" %}
+{% load static %}
+
+{% block form %}
+
+<h3>Create SPB SAP</h3>
+
+<form method="post" class="form-object-edit">
+    {% csrf_token %}
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>SAP Configuration</strong></div>
+        <div class="panel-body">
+
+            <div class="form-group">
+                <label>Service</label>
+                {{ form.service }}
+            </div>
+
+            <div class="form-group">
+                <label>Admin State</label>
+                {{ form.admin_state }}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Devices & Interfaces</strong></div>
+        <div class="panel-body">
+
+            <div class="form-group">
+                <label>Devices</label>
+                {{ form.devices }}
+            </div>
+
+            <div class="form-group">
+                <label>Interfaces</label>
+                {{ form.interfaces }}
+            </div>
+
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Encapsulation per Interface</strong></div>
+        <div class="panel-body">
+            <div id="encap-container"></div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save SAP</button>
+
+</form>
+
+{% endblock %}
+
+
+{% block javascript %}
+{{ block.super }}
+
+<script>
+async function fetchInterfaces(deviceId) {
+    let r = await fetch(`/api/dcim/interfaces/?device_id=${deviceId}`);
+    return (await r.json()).results;
+}
+
+const deviceSelect = document.getElementById("id_devices");
+const interfaceSelect = document.getElementById("id_interfaces");
+const encapContainer = document.getElementById("encap-container");
+
+/* --- When devices change, load interfaces --- */
+deviceSelect.addEventListener("change", async function () {
+
+    const devices = Array.from(deviceSelect.selectedOptions).map(x => x.value);
+    interfaceSelect.innerHTML = "";
+
+    let fullList = [];
+
+    for (let d of devices) {
+        const ints = await fetchInterfaces(d);
+        fullList = fullList.concat(ints);
+    }
+
+    fullList.forEach(intf => {
+        let opt = document.createElement("option");
+        opt.value = intf.id;
+        opt.textContent = `${intf.device.name} - ${intf.name}`;
+        interfaceSelect.appendChild(opt);
+    });
+
+    $(interfaceSelect).trigger("change");
+});
+
+/* --- When interfaces selected, create encap fields --- */
+interfaceSelect.addEventListener("change", function () {
+    encapContainer.innerHTML = "";
+
+    Array.from(interfaceSelect.selectedOptions).forEach(opt => {
+
+        const block = document.createElement("div");
+        block.classList.add("form-group");
+
+        block.innerHTML = `
+            <label>Encapsulation for ${opt.text}</label>
+            <input type="text" 
+                   class="form-control"
+                   name="encap_${opt.value}"
+                   placeholder=":0, :10, :20">
+        `;
+
+        encapContainer.appendChild(block);
+    });
+});
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>SPB BVLAN: {{ object }}</h1>
+<table class="table table-hover attr-table">
+  <tr><th>Bvlan ID</th><td>{{ object.bvlan_id }}</td></tr>
+  <tr><th>Name</th><td>{{ object.name }}</td></tr>
+  <tr><th>ECT ID</th><td>{{ object.ect_id }}</td></tr>
+  <tr><th>Control</th><td>{{ object.control }}</td></tr>
+  <tr><th>Admin State</th><td>{{ object.admin_state }}</td></tr>
+  <tr><th>Description</th><td>{{ object.description }}</td></tr>
+</table>
+{% endblock %}
+

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load helpers %}
+
+<div class="container mt-4">
+
+    <!-- Header with actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>SPB SAP – {{ object.device.name }} / {{ object.interface.name }}</h2>
+
+        <div>
+            <a href="{% url 'plugins:nautobot_spb:spb_sap_edit' pk=object.pk %}" class="btn btn-primary btn-sm">
+                ✏️ Edit
+            </a>
+            <a href="{% url 'plugins:nautobot_spb:spb_sap_delete' pk=object.pk %}" class="btn btn-danger btn-sm">
+                🗑 Delete
+            </a>
+            <a href="{% url 'plugins:nautobot_spb:spb_sap_list' %}" class="btn btn-secondary btn-sm">
+                ← Back
+            </a>
+        </div>
+    </div>
+<h1>SPB SAP: {{ object }}</h1>
+<table class="table table-hover attr-table">
+  <tr><th>Service</th><td>{{ object.service }}</td></tr>
+  <tr><th>Device</th><td>{{ object.device }}</td></tr>
+  <tr><th>Interface</th><td>{{ object.interface }}</td></tr>
+  <tr><th>Encapsulation</th><td>{{ object.encapsulation }}</td></tr>
+  <tr><th>Admin State</th><td>{{ object.admin_state }}</td></tr>
+</table>
+
+</div>
+{% endblock %}
+

@@ -1,13 +1,17 @@
 [project]
 name = "nautobot-spb"
 version = "0.1"
-description = "SPB Support for Nautobot"
-authors = [{ name = "LINA", email = "linaouali547@gmail.com" }]
+description = "SPB Support for Nautobot (Shortest Path Bridging)"
+authors = [{ name = "Lina", email = "linaouali547@gmail.com" }]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
 dependencies = ["nautobot>=2.4"]
 
 [project.entry-points."nautobot.plugins"]
-nautobot_spb = "nautobot_spb"
+nautobot_spb = "nautobot_spb.plugin:NautobotSPBConfig"
 
 [tool.nautobot]
 min_version = "2.4.0"
+max_version = "2.5.99"
 
