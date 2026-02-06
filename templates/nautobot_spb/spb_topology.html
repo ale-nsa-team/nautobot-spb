@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load helpers %}
+{% load spb_filters %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- 🔹 Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>SPB Topology – {{ object.name }}</h2>
+        <div>
+            <a href="{% url 'plugins:nautobot_spb:spb_topology_edit' pk=object.pk %}" class="btn btn-primary btn-sm">
+                ✏️ Edit
+            </a>
+            <a href="{% url 'plugins:nautobot_spb:spb_topology_delete' pk=object.pk %}" class="btn btn-danger btn-sm">
+                🗑 Delete
+            </a>
+            <a href="{% url 'plugins:nautobot_spb:spb_topology_list' %}" class="btn btn-secondary btn-sm">
+                ← Back
+            </a>
+        </div>
+    </div>
+
+    {% if object.description %}
+        <p class="text-muted">{{ object.description }}</p>
+    {% endif %}
+
+    <!-- 🔸 Topology Overview Cards -->
+    <div class="row text-center mb-4">
+        <div class="col-md-2">
+            <div class="card border-primary shadow-sm">
+                <div class="card-body p-3">
+                    <h6 class="text-primary">Devices</h6>
+                    <h3 class="fw-bold">{{ object.devices.count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card border-info shadow-sm">
+                <div class="card-body p-3">
+                    <h6 class="text-info">Interfaces</h6>
+                    <h3 class="fw-bold">{{ object.related_interfaces.count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card border-success shadow-sm">
+                <div class="card-body p-3">
+                    <h6 class="text-success">Control BVLAN</h6>
+                    <h3 class="fw-bold">{{ object.control_bvlan_id }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body p-3">
+                    <h6 class="text-warning">Data BVLANs</h6>
+                    <h3 class="fw-bold">
+                        {% with bvlan_list=object.data_bvlan_ids|split:"," %}
+                            {{ bvlan_list|length }}
+                        {% endwith %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-secondary shadow-sm">
+                <div class="card-body p-3">
+                    <h6 class="text-secondary">Interface Type</h6>
+                    <h5 class="fw-bold text-dark">{{ object.topology_interface_type|default:"—" }}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 General Information -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light"><strong>General Information</strong></div>
+        <div class="card-body">
+            <table class="table table-sm table-striped align-middle">
+                <tr>
+                    <th style="width: 25%">Control BVLAN</th>
+                    <td><span class="badge bg-primary px-3 py-2">{{ object.control_bvlan_id }}</span></td>
+                </tr>
+                <tr>
+                    <th>Devices</th>
+                    <td>
+                        {% if object.devices.all %}
+                            {% for device in object.devices.all %}
+                                <a href="{{ device.get_absolute_url }}" class="badge bg-secondary text-light me-1">{{ device.name }}</a>
+                            {% endfor %}
+                        {% else %}
+                            <em>No devices assigned.</em>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 🔹 Data BVLANs Section -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light"><strong>Data BVLANs</strong></div>
+        <div class="card-body">
+            {% if object.data_bvlan_ids %}
+                <table class="table table-sm table-hover text-center align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">BVLAN ID</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Linked Services</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% with bvlan_list=object.data_bvlan_ids|split:"," %}
+                            {% for bvlan_id in bvlan_list %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><span class="badge bg-info text-dark px-3 py-2">{{ bvlan_id }}</span></td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td><em>—</em></td>
+                                </tr>
+                            {% endfor %}
+                        {% endwith %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p><em>No Data BVLANs configured for this topology.</em></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 🔹 Default SPB Interface Config -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light"><strong>SPB Interface Configuration</strong></div>
+        <div class="card-body">
+            <table class="table table-sm table-striped">
+                <tr><th>Interface Type</th><td>{{ object.topology_interface_type|default:"-" }}</td></tr>
+                <tr><th>Hello Interval</th><td>{{ object.topology_hello_interval|default:"-" }}</td></tr>
+                <tr><th>Hello Multiplier</th><td>{{ object.topology_hello_multiplier|default:"-" }}</td></tr>
+                <tr><th>Metric</th><td>{{ object.topology_metric|default:"-" }}</td></tr>
+                <tr><th>Priority</th><td>{{ object.topology_priority|default:"-" }}</td></tr>
+                <tr><th>Admin State</th><td>{{ object.topology_admin_state|yesno:"Enabled,Disabled" }}</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 🔹 Linked Interfaces -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light"><strong>Linked Interfaces</strong></div>
+        <div class="card-body">
+            {% if object.related_interfaces.all %}
+                <table class="table table-sm table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Device</th>
+                            <th>Interface</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for iface in object.related_interfaces.all %}
+                            <tr>
+                                <td>
+                                    {% if iface.device %}
+                                        <a href="{{ iface.device.get_absolute_url }}">{{ iface.device.name }}</a>
+                                    {% else %}
+                                        <em>—</em>
+                                    {% endif %}
+                                </td>
+                                <td>{{ iface.name }}</td>
+                                <td>{{ iface.description|default:"—" }}</td>
+                                <td><span class="badge bg-success">Up</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <em>No interfaces linked to this topology.</em>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

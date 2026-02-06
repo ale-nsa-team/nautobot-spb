@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>SPB Service: {{ object }}</h1>
+<table class="table table-hover attr-table">
+  <tr><th>Service ID</th><td>{{ object.service_id }}</td></tr>
+  <tr><th>ISID</th><td>{{ object.isid }}</td></tr>
+  <tr><th>BVLAN</th><td>{{ object.bvlan }}</td></tr>
+  <tr><th>Admin State</th><td>{{ object.admin_state }}</td></tr>
+  <tr><th>Multicast Mode</th><td>{{ object.multicast_mode }}</td></tr>
+  <tr><th>Description</th><td>{{ object.description }}</td></tr>
+</table>
+{% endblock %}
+

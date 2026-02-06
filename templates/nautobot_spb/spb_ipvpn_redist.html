@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>SPB IPVPN Redist: {{ object }}</h1>
+<table class="table table-hover attr-table">
+  <tr><th>Source VRF</th><td>{{ object.source_vrf }}</td></tr>
+  <tr><th>Source ISID</th><td>{{ object.source_isid }}</td></tr>
+  <tr><th>Destination ISID</th><td>{{ object.dest_isid }}</td></tr>
+  <tr><th>Route Map</th><td>{{ object.route_map }}</td></tr>
+  <tr><th>All Routes</th><td>{{ object.all_routes }}</td></tr>
+</table>
+{% endblock %}
+

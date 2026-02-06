@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>SPB ISIS Instance: {{ object }}</h1>
+<table class="table table-hover attr-table">
+  <tr><th>Device</th><td>{{ object.device }}</td></tr>
+  <tr><th>Bridge Priority</th><td>{{ object.bridge_priority }}</td></tr>
+  <tr><th>Control BVLAN</th><td>{{ object.control_bvlan }}</td></tr>
+  <tr><th>Graceful Restart</th><td>{{ object.graceful_restart }}</td></tr>
+</table>
+{% endblock %}
+
