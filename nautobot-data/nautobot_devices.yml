@@ -1,0 +1,47 @@
+manufacturers:
+  - name: Alcatel-Lucent
+
+device_types:
+  - model: OS6870
+    u_height: 1
+    manufacturer: Alcatel-Lucent
+
+platforms:
+  - name: AOS
+    network_driver: alcatel_aos
+    manufacturer: Alcatel-Lucent
+
+software_versions:
+  - version: latest
+    platform: AOS
+
+devices:
+  - name: SW1
+    role: Provider Edge
+    location: Colombes
+    device_type: OS6870
+    platform: AOS
+    software_version: latest
+    primary_ip4: 192.168.121.20/24
+  - name: SW2
+    role: Provider Edge
+    location: Colombes
+    device_type: OS6870
+    platform: AOS
+    software_version: latest
+    primary_ip4: 192.168.121.21/24
+  - name: SW3
+    role: Provider Edge
+    location: Colombes
+    device_type: OS6870
+    platform: AOS
+    software_version: latest
+    primary_ip4: 192.168.121.22/24
+  - name: SW-4
+    role: Provider Edge
+    location: Colombes
+    device_type: OS6870
+    platform: AOS
+    software_version: latest
+    primary_ip4: 192.168.121.23/24
+

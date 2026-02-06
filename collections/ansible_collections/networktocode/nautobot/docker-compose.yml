@@ -1,0 +1,51 @@
+---
+x-args:
+  &args
+  PYTHON_VER: ${PYTHON_VER}
+  ANSIBLE_SANITY_ARGS: ${ANSIBLE_SANITY_ARGS:-}
+  ANSIBLE_UNIT_ARGS: ${ANSIBLE_UNIT_ARGS:-}
+  SKIP_LINT_TESTS: ${SKIP_LINT_TESTS:-}
+  SKIP_SANITY_TESTS: ${SKIP_SANITY_TESTS:-}
+  SKIP_UNIT_TESTS: ${SKIP_UNIT_TESTS:-}
+  SKIP_INVENTORY_TESTS: ${SKIP_INVENTORY_TESTS:-}
+  SKIP_REGRESSION_TESTS: ${SKIP_REGRESSION_TESTS:-}
+# Build block with context and target default
+x-build:
+  &build
+  args: *args
+  context: .
+  target: unittests
+x-service:
+  &service
+  environment:
+    ANSIBLE_INTEGRATION_ARGS: ${ANSIBLE_INTEGRATION_ARGS:-}
+    ANSIBLE_SANITY_ARGS: ${ANSIBLE_SANITY_ARGS:-}
+    ANSIBLE_UNIT_ARGS: ${ANSIBLE_UNIT_ARGS:-}
+    NAUTOBOT_VER: ${NAUTOBOT_VER:-}
+    OUTPUT_INVENTORY_JSON: ${OUTPUT_INVENTORY_JSON:-}
+    SKIP_LINT_TESTS: ${SKIP_LINT_TESTS:-}
+    SKIP_SANITY_TESTS: ${SKIP_SANITY_TESTS:-}
+    SKIP_UNIT_TESTS: ${SKIP_UNIT_TESTS:-}
+    SKIP_INVENTORY_TESTS: ${SKIP_INVENTORY_TESTS:-}
+    SKIP_REGRESSION_TESTS: ${SKIP_REGRESSION_TESTS:-}
+
+services:
+  unit:
+    <<: *service
+    build:
+      <<: *build
+
+  lint:
+    <<: *service
+    build:
+      <<: *build
+      target: lint
+
+  integration:
+    <<: *service
+    build:
+      <<: *build
+      target: integration
+    volumes:
+      # This allows us to update the inventory files from inside the container
+      - ${PWD}/tests/integration/targets/inventory/files/:/tmp/inventory_files/

@@ -1,0 +1,362 @@
+[
+    {
+        "parent": "circuit",
+        "module_data": {
+            "cid": "Test-Circuit-1000",
+            "cluster_type": "Test Circuit Type",
+            "provider": "Test Provider"
+        },
+        "expected": {
+            "cid": "Test-Circuit-1000"
+        }
+    },
+    {
+        "parent": "circuit_termination",
+        "module_data": {
+            "circuit": "Test Circuit",
+            "term_side": "A",
+            "site": "Test Site",
+            "port_speed": 10000
+        },
+        "expected": {
+            "circuit": "Test Circuit",
+            "term_side": "A"
+        }
+    },
+    {
+        "parent": "circuit_type",
+        "module_data": {
+            "name": "Test Circuit Type"
+        },
+        "expected": {
+            "name": "Test Circuit Type"
+        }
+    },
+    {
+        "parent": "cluster",
+        "module_data": {
+            "name": "Test Cluster",
+            "type": "Test Cluster Type",
+            "site": "Test Site"
+        },
+        "expected": {
+            "name": "Test Cluster",
+            "type_id": 1
+        }
+    },
+    {
+        "parent": "cluster_group",
+        "module_data": {
+            "name": "Test Cluster Group"
+        },
+        "expected": {
+            "name": "Test Cluster Group"
+        }
+    },
+    {
+        "parent": "cluster_type",
+        "module_data": {
+            "name": "Test Cluster Type"
+        },
+        "expected": {
+            "name": "Test Cluster Type"
+        }
+    },
+    {
+        "parent": "device",
+        "module_data": {
+            "name": "Test Device",
+            "status": "Active"
+        },
+        "expected": {
+            "name": "Test Device"
+        }
+    },
+    {
+        "parent": "device_bay",
+        "module_data": {
+            "name": "Device Bay #1",
+            "device": "test100"
+        },
+        "expected": {
+            "name": "Device Bay #1",
+            "device": "test100"
+        }
+    },
+    {
+        "parent": "role",
+        "module_data": {
+            "name": "Test Device Role",
+            "status": "Active"
+        },
+        "expected": {
+            "name": "Test Device Role"
+        }
+    },
+    {
+        "parent": "device_type",
+        "module_data": {
+            "model": "Test Device Type",
+            "status": "Active"
+        },
+        "expected": {
+            "model": "Test Device Type"
+        }
+    },
+    {
+        "parent": "installed_device",
+        "module_data": {
+            "name": "Test Device",
+            "status": "Active"
+        },
+        "expected": {
+            "name": "Test Device"
+        }
+    },
+    {
+        "parent": "interface",
+        "module_data": {
+            "name": "GigabitEthernet1",
+            "device": "Test Device",
+            "form_factor": 1000
+        },
+        "expected": {
+            "name": "GigabitEthernet1",
+            "device_id": 1
+        }
+    },
+    {
+        "parent": "interface",
+        "module_data": {
+            "name": "Eth0",
+            "virtual_machine": "Test Device",
+            "type": 0
+        },
+        "expected": {
+            "name": "Eth0",
+            "virtual_machine_id": 1
+        }
+    },
+    {
+        "parent": "inventory_item",
+        "module_data": {
+            "name": "10G-SFP+",
+            "device": "test100",
+            "serial": "1234",
+            "asset_tag": "1234"
+        },
+        "expected": {
+            "name": "10G-SFP+",
+            "device": "test100"
+        }
+    },
+    {
+        "parent": "ip_address",
+        "module_data": {
+            "address": "192.168.1.1/24",
+            "description": "Test description"
+        },
+        "expected": {
+            "address": "192.168.1.1/24"
+        }
+    },
+    {
+        "parent": "prefix",
+        "module_data": {
+            "prefix": "10.10.10.0/24",
+            "status": "Reserved"
+        },
+        "expected": {
+            "prefix": "10.10.10.0/24"
+        }
+    },
+    {
+        "parent": "prefix",
+        "module_data": {
+            "parent": "10.10.0.0/16"
+        },
+        "expected": {
+            "prefix": "10.10.0.0/16"
+        }
+    },
+    {
+        "parent": "provider",
+        "module_data": {
+            "name": "Test Provider",
+            "asn": 65001
+        },
+        "expected": {
+            "name": "Test Provider"
+        }
+    },
+    {
+        "parent": "rack",
+        "module_data": {
+            "name": "Test Rack",
+            "location": "Test Site"
+        },
+        "expected": {
+            "name": "Test Rack",
+            "location": "Test Site"
+        }
+    },
+    {
+        "parent": "rack_group",
+        "module_data": {
+            "name": "Test Rack Group"
+        },
+        "expected": {
+            "name": "Test Rack Group"
+        }
+    },
+    {
+        "parent": "role",
+        "module_data": {
+            "name": "Test Rack Role"
+        },
+        "expected": {
+            "name": "Test Rack Role"
+        }
+    },
+    {
+        "parent": "rir",
+        "module_data": {
+            "name": "Test RIR One"
+        },
+        "expected": {
+            "name": "Test RIR One"
+        }
+    },
+    {
+        "parent": "location",
+        "module_data": {
+            "id": "1",
+            "name": "Test Location",
+            "asn": 65000,
+            "contact_name": "John Smith"
+        },
+        "expected": {
+            "id": "1"
+        }
+    },
+    {
+        "parent": "tenant",
+        "module_data": {
+            "name": "Test Tenant",
+            "description": "Test Description"
+        },
+        "expected": {
+            "name": "Test Tenant"
+        }
+    },
+    {
+        "parent": "tenant_group",
+        "module_data": {
+            "name": "Test Tenant Group",
+            "description": "Test Description"
+        },
+        "expected": {
+            "name": "Test Tenant Group"
+        }
+    },
+    {
+        "parent": "interface_template",
+        "module_data": {
+            "device_type": 1,
+            "name": "SFP+ (10GBE)",
+            "type": "SFP+ (10GBE)"
+        },
+        "expected": {
+            "name": "SFP+ (10GBE)",
+            "device_type": 1
+        }
+    },
+    {
+        "parent": "device_bay_template",
+        "module_data": {
+            "name": "Bay 1",
+            "device_type": 1
+        },
+        "expected": {
+            "name": "Bay 1",
+            "device_type": 1
+        }
+    },
+    {
+        "parent": "console_port_template",
+        "module_data": {
+            "name": "CP 1",
+            "device_type": 1
+        },
+        "expected": {
+            "name": "CP 1",
+            "device_type": 1
+        }
+    },
+    {
+        "parent": "console_server_port_template",
+        "module_data": {
+            "name": "CP - Server 1",
+            "device_type": 1
+        },
+        "expected": {
+            "name": "CP - Server 1",
+            "device_type": 1
+        }
+    },
+    {
+        "parent": "interface_template",
+        "module_data": {
+            "name": "Dev Intf 1",
+            "device_type": 1
+        },
+        "expected": {
+            "name": "Dev Intf 1",
+            "device_type": 1
+        }
+    },
+    {
+        "parent": "front_port_template",
+        "module_data": {
+            "name": "FP 1",
+            "device_type": 1
+        },
+        "expected": {
+            "name": "FP 1",
+            "device_type": 1
+        }
+    },
+    {
+        "parent": "power_outlet_template",
+        "module_data": {
+            "name": "PO 1",
+            "device_type": 1
+        },
+        "expected": {
+            "name": "PO 1",
+            "device_type": 1
+        }
+    },
+    {
+        "parent": "power_port_template",
+        "module_data": {
+            "name": "PP 1",
+            "device_type": 1
+        },
+        "expected": {
+            "name": "PP 1",
+            "device_type": 1
+        }
+    },
+    {
+        "parent": "virtual_machine",
+        "module_data": {
+            "name": "Test VM 100",
+            "cluster": "Test Cluster"
+        },
+        "expected": {
+            "name": "Test VM 100",
+            "cluster_id": 1
+        }
+    }
+]

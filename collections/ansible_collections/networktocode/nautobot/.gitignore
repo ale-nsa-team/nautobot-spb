@@ -1,0 +1,33 @@
+networktocode-nautobot*.tar.gz
+__pycache__/
+*.pyc
+tests/output/*
+venv/
+.venv/
+.vscode/
+changelogs/.plugin-cache.yaml
+docs/_build/*
+.python-version
+pb.*.yml
+.DS_Store
+.env
+invoke.yml
+
+# Ignore folder created by `invoke docs`
+collections/
+
+# https://github.com/ansible/ansible/issues/68499
+# ansible_collections/
+
+# Hypothesis output when tests are run locally
+.hypothesis/
+ansible.cfg
+
+# Ignore any debugging args except the example(s)
+debugging_args/*
+!debugging_args/*.example
+nautobot-ansible.code-workspace
+
+# Ignore dev docker-compose overrides
+development/*.override.yml
+nautobot.sql

@@ -1,0 +1,116 @@
+---
+##
+##
+### PYNAUTOBOT_PLATFORM
+##
+##
+- name: "PLATFORM 1: Necessary info creation"
+  networktocode.nautobot.platform:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Test Platform
+    state: present
+  register: test_one
+
+- name: "PLATFORM 1: ASSERT - Necessary info creation"
+  assert:
+    that:
+      - test_one is changed
+      - test_one['diff']['before']['state'] == "absent"
+      - test_one['diff']['after']['state'] == "present"
+      - test_one['platform']['name'] == "Test Platform"
+      - test_one['msg'] == "platform Test Platform created"
+
+- name: "PLATFORM 2: Create duplicate"
+  networktocode.nautobot.platform:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Test Platform
+    state: present
+  register: test_two
+
+- name: "PLATFORM 2: ASSERT - Create duplicate"
+  assert:
+    that:
+      - not test_two['changed']
+      - test_two['platform']['name'] == "Test Platform"
+      - test_two['msg'] == "platform Test Platform already exists"
+
+- name: "PLATFORM 3: Update"
+  networktocode.nautobot.platform:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Test Platform
+    manufacturer: Test Manufacturer
+    napalm_driver: ios
+    napalm_args:
+      global_delay_factor: 2
+    network_driver: cisco_ios
+    state: present
+  register: test_three
+
+- name: "PLATFORM 3: ASSERT - Update"
+  assert:
+    that:
+      - test_three is changed
+      - test_three['diff']['after']['manufacturer'] == manufacturer['key']
+      - test_three['diff']['after']['napalm_args']['global_delay_factor'] == 2
+      - test_three['diff']['after']['napalm_driver'] == "ios"
+      - test_three['platform']['manufacturer'] == manufacturer['key']
+      - test_three['platform']['napalm_args']['global_delay_factor'] == 2
+      - test_three['platform']['napalm_driver'] == "ios"
+      - test_three['platform']['network_driver'] == "cisco_ios"
+      - test_three['msg'] == "platform Test Platform updated"
+  vars:
+    manufacturer: "{{ lookup('networktocode.nautobot.lookup', 'manufacturers', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=\"Test Manufacturer\"') }}"
+
+- name: "PLATFORM 4: Update duplicate"
+  networktocode.nautobot.platform:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Test Platform
+    manufacturer: Test Manufacturer
+    napalm_driver: ios
+    napalm_args:
+      global_delay_factor: 2
+    network_driver: cisco_ios
+    state: present
+  register: test_four
+
+- name: "PLATFORM 4: ASSERT - Update duplicate"
+  assert:
+    that:
+      - not test_four['changed']
+      - test_four['platform']['name'] == "Test Platform"
+      - test_four['msg'] == "platform Test Platform already exists"
+
+- name: "PLATFORM 5: Delete"
+  networktocode.nautobot.platform:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Test Platform
+    state: absent
+  register: test_five
+
+- name: "PLATFORM 5: ASSERT - Delete"
+  assert:
+    that:
+      - test_five is changed
+      - test_five['diff']['before']['state'] == "present"
+      - test_five['diff']['after']['state'] == "absent"
+      - test_five['msg'] == "platform Test Platform deleted"
+
+- name: "PLATFORM 6: Delete non existing"
+  networktocode.nautobot.platform:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Test Platform
+    state: absent
+  register: test_six
+
+- name: "PLATFORM 6: ASSERT - Delete non existing`"
+  assert:
+    that:
+      - not test_six['changed']
+      - test_six['platform'] == None
+      - test_six['msg'] == "platform Test Platform already absent"

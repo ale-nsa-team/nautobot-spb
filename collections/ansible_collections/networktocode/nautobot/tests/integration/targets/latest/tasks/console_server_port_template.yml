@@ -1,0 +1,179 @@
+---
+# © 2020 Nokia
+# Licensed under the GNU General Public License v3.0 only
+# SPDX-License-Identifier: GPL-3.0-only
+##
+##
+### PYNAUTOBOT_CONSOLE_SERVER_PORT_TEMPLATE
+##
+##
+- set_fact:
+    cisco_test: "{{ lookup('networktocode.nautobot.lookup', 'device-types', api_endpoint=nautobot_url, token=nautobot_token, api_filter='model=\"Cisco Test\"') }}"
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 1: Necessary info creation"
+  networktocode.nautobot.console_server_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Console Server Port Template
+    device_type: Cisco Test
+    state: present
+  register: test_one
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 1: ASSERT - Necessary info creation"
+  assert:
+    that:
+      - test_one is changed
+      - test_one['diff']['before']['state'] == "absent"
+      - test_one['diff']['after']['state'] == "present"
+      - test_one['console_server_port_template']['name'] == "Console Server Port Template"
+      - test_one['console_server_port_template']['device_type'] == cisco_test['key']
+      - test_one['msg'] == "console_server_port_template Console Server Port Template created"
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 2: Create duplicate"
+  networktocode.nautobot.console_server_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Console Server Port Template
+    device_type: Cisco Test
+    state: present
+  register: test_two
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 2: ASSERT - Create duplicate"
+  assert:
+    that:
+      - not test_two['changed']
+      - test_two['console_server_port_template']['name'] == "Console Server Port Template"
+      - test_two['console_server_port_template']['device_type'] == cisco_test['key']
+      - test_two['msg'] == "console_server_port_template Console Server Port Template already exists"
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 3: Update Console Server Port Template with other fields"
+  networktocode.nautobot.console_server_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Console Server Port Template
+    device_type: Cisco Test
+    type: usb-a
+    state: present
+  register: test_three
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 3: ASSERT - Update Console Server Port Template with other fields"
+  assert:
+    that:
+      - test_three is changed
+      - test_three['diff']['after']['type'] == "usb-a"
+      - test_three['console_server_port_template']['name'] == "Console Server Port Template"
+      - test_three['console_server_port_template']['device_type'] == cisco_test['key']
+      - test_three['console_server_port_template']['type'] == "usb-a"
+      - test_three['msg'] == "console_server_port_template Console Server Port Template updated"
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 4: Create Console Server Port Template for Delete Test"
+  networktocode.nautobot.console_server_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Console Server Port Template 2
+    device_type: Cisco Test
+    state: present
+  register: test_four
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 4: ASSERT - Create Console Server Port Template for Delete Test"
+  assert:
+    that:
+      - test_four is changed
+      - test_four['diff']['before']['state'] == "absent"
+      - test_four['diff']['after']['state'] == "present"
+      - test_four['console_server_port_template']['name'] == "Console Server Port Template 2"
+      - test_four['console_server_port_template']['device_type'] == cisco_test['key']
+      - test_four['msg'] == "console_server_port_template Console Server Port Template 2 created"
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 5: Delete Console Server Port Template"
+  networktocode.nautobot.console_server_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Console Server Port Template 2
+    device_type: Cisco Test
+    state: absent
+  register: test_five
+
+- name: "CONSOLE_SERVER_PORT_TEMPLATE 5: ASSERT - Delete Console Server Port Template"
+  assert:
+    that:
+      - test_five is changed
+      - test_five['diff']['before']['state'] == "present"
+      - test_five['diff']['after']['state'] == "absent"
+      - test_five['msg'] == "console_server_port_template Console Server Port Template 2 deleted"
+
+- name: "NAUTOBOT 2.3+ TESTS"
+  when: 
+    - "nautobot_version is version('2.3', '>=')"
+  block:
+    - name: "6 - SET ADDITIONAL FACTS"
+      set_fact:
+        test_module_type: '{{ lookup(''networktocode.nautobot.lookup'', ''module-types'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''model="HooverMaxProModel60"'') }}'
+        
+    - name: "CONSOLE_SERVER_PORT_TEMPLATE 6: Create console server port template on module type"
+      networktocode.nautobot.console_server_port_template:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Console Server Port Template 3
+        module_type: HooverMaxProModel60
+        state: present
+      register: test_six
+
+    - name: "CONSOLE_SERVER_PORT_TEMPLATE 6: ASSERT"
+      assert:
+        that:
+          - test_six is changed
+          - test_six['diff']['before']['state'] == "absent"
+          - test_six['diff']['after']['state'] == "present"
+          - test_six['console_server_port_template']['name'] == "Console Server Port Template 3"
+          - test_six['console_server_port_template']['module_type'] == test_module_type['key']
+          - test_six['msg'] == "console_server_port_template Console Server Port Template 3 created"
+
+    - name: "CONSOLE_SERVER_PORT_TEMPLATE 7: Create duplicate"
+      networktocode.nautobot.console_server_port_template:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Console Server Port Template 3
+        module_type: HooverMaxProModel60
+        state: present
+      register: test_seven
+
+    - name: "CONSOLE_SERVER_PORT_TEMPLATE 7: ASSERT - Create duplicate"
+      assert:
+        that:
+          - not test_seven['changed']
+          - test_seven['console_server_port_template']['name'] == "Console Server Port Template 3"
+          - test_seven['console_server_port_template']['module_type'] == test_module_type['key']
+          - test_seven['msg'] == "console_server_port_template Console Server Port Template 3 already exists"
+
+    - name: "CONSOLE_SERVER_PORT_TEMPLATE 8: Delete console server port template on module type"
+      networktocode.nautobot.console_server_port_template:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Console Server Port Template 3
+        module_type: HooverMaxProModel60
+        state: absent
+      register: test_eight
+
+    - name: "CONSOLE_SERVER_PORT_TEMPLATE 8: ASSERT"
+      assert:
+        that:
+          - test_eight is changed
+          - test_eight['diff']['before']['state'] == "present"
+          - test_eight['diff']['after']['state'] == "absent"
+          - test_eight['msg'] == "console_server_port_template Console Server Port Template 3 deleted"
+
+    - name: "CONSOLE_SERVER_PORT_TEMPLATE 9: Delete console server port template on module type duplicate"
+      networktocode.nautobot.console_server_port_template:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Console Server Port Template 3
+        module_type: HooverMaxProModel60
+        state: absent
+      register: test_nine
+
+    - name: "CONSOLE_SERVER_PORT_TEMPLATE 9: ASSERT"
+      assert:
+        that:
+          - not test_nine['changed']
+          - "'already absent' in test_nine['msg']"

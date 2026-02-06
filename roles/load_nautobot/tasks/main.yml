@@ -1,0 +1,20 @@
+---
+- name: Build Nautobot Extensibility
+  import_tasks: extensibility.yml
+  tags: [extensibility]
+
+- name: Build Nautobot organizational data
+  import_tasks: organizational.yml
+  tags: [organization]
+
+- name: Build Nautobot IPAM data
+  import_tasks: ipam.yml
+  tags: [ipam]
+
+- name: Build Nautobot device data
+  import_tasks: devices.yml
+  tags: [devices]
+
+- name: Build Nautobot BGP routing instances
+  import_tasks: bgp.yml
+  tags: [bgp]

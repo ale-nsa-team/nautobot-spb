@@ -1,0 +1,36 @@
+{
+    "name": "mydevice",
+    "platform": {
+        "napalm_driver": "asa"
+    },
+    "status": {
+        "name": "Active"
+    },
+    "primary_ip4": {
+        "host": "10.10.10.10"
+    },
+    "primary_ip6": {
+        "host": "2001:db8::1"
+    },
+    "role": {
+        "name": "edge",
+        "color_category": {
+            "primary": "red"
+        }
+    },
+    "location": {
+        "name": "ATL01"
+    },
+    "tenant": {
+        "name": "My Tenant",
+        "type": "local"
+    },
+    "tags": [
+        {
+            "name": "MyTag"
+        },
+        {
+            "name": "MyTag2"
+        }
+    ]
+}

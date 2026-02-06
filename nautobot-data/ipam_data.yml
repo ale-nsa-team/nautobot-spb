@@ -1,0 +1,59 @@
+namespaces:
+  - name: global
+    description: "Default global namespace"
+    status: Active
+
+prefixes:
+  - prefix: 10.0.0.0/29
+    namespace: global
+    status: Active
+    description: ""
+  - prefix: 172.16.100.0/24
+    namespace: global
+    status: Active
+    description: "TEST SCOPE"
+  - prefix: 192.168.121.0/24
+    namespace: global
+    status: Active
+    description: "Devices Management"
+
+ip_addresses:
+  - address: 192.168.121.20/24
+    namespace: global
+    assigned_object: SW1
+  - address: 192.168.121.21/24
+    namespace: global
+    assigned_object: SW2
+  - address: 192.168.121.22/24
+    namespace: global
+    assigned_object: SW3
+
+devices:
+  - name: SW1
+    status: Active
+    role: Provider Edge
+    type: Alcatel-Lucent Enterprise OS6870
+    location: Colombes
+    ip_address: 192.168.121.20/24
+
+  - name: SW2
+    status: Active
+    role: Provider Edge
+    type: Alcatel-Lucent Enterprise OS6870
+    location: Colombes
+    ip_address: 192.168.121.21/24
+
+  - name: SW3
+    status: Active
+    role: Provider Edge
+    type: Alcatel-Lucent Enterprise OS6870
+    location: Colombes
+    ip_address: 192.168.121.22/24
+
+  - name: SW-4
+    status: Active
+    role: Provider Edge
+    type: Alcatel-Lucent Enterprise OS6870
+    location: Colombes
+    ip_address: null
+

@@ -1,0 +1,178 @@
+---
+# © 2020 Nokia
+# Licensed under the GNU General Public License v3.0 only
+# SPDX-License-Identifier: GPL-3.0-only
+##
+##
+### PYNAUTOBOT_POWER_OUTLET
+##
+##
+- name: "POWER_PORT 0: Create device for testing power ports"
+  networktocode.nautobot.device:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Device Power Outlet
+    device_type: Cisco Test
+    role: Core Switch
+    location:
+      name: "Child Test Location"
+      parent: "Parent Test Location"
+    status: "Active"
+    state: present
+
+- name: "Create Power Port for testing"
+  networktocode.nautobot.power_port:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Device Power Outlet Power Port
+    device: Device Power Outlet
+    state: present
+
+- set_fact:
+    device: '{{ lookup(''networktocode.nautobot.lookup'', ''devices'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''name="Device Power Outlet"'') }}'
+    power_port: '{{ lookup(''networktocode.nautobot.lookup'', ''power-ports'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''name="Device Power Outlet Power Port"'') }}'
+
+- name: "POWER_OUTLET 1: Necessary info creation"
+  networktocode.nautobot.power_outlet:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Outlet
+    device: Device Power Outlet
+    state: present
+  register: test_one
+
+- name: "POWER_OUTLET 1: ASSERT - Necessary info creation"
+  assert:
+    that:
+      - test_one is changed
+      - test_one['diff']['before']['state'] == "absent"
+      - test_one['diff']['after']['state'] == "present"
+      - test_one['power_outlet']['name'] == "Power Outlet"
+      - test_one['power_outlet']['device'] == device['key']
+      - test_one['msg'] == "power_outlet Power Outlet created"
+
+- name: "POWER_OUTLET 2: Create duplicate"
+  networktocode.nautobot.power_outlet:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Outlet
+    device: Device Power Outlet
+    state: present
+  register: test_two
+
+- name: "POWER_OUTLET 2: ASSERT - Create duplicate"
+  assert:
+    that:
+      - not test_two['changed']
+      - test_two['power_outlet']['name'] == "Power Outlet"
+      - test_two['power_outlet']['device'] == device['key']
+      - test_two['msg'] == "power_outlet Power Outlet already exists"
+
+- name: "POWER_OUTLET 3: Update power_outlet with other fields"
+  networktocode.nautobot.power_outlet:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Outlet
+    device: Device Power Outlet
+    type: ita-e
+    power_port: Device Power Outlet Power Port
+    feed_leg: B
+    description: test description
+    state: present
+  register: test_three
+
+- name: "POWER_OUTLET 3: ASSERT - Update power_outlet with other fields"
+  assert:
+    that:
+      - test_three is changed
+      - test_three['diff']['after']['type'] == "ita-e"
+      - test_three['diff']['after']['power_port'] == power_port['key']
+      - test_three['diff']['after']['feed_leg'] == "B"
+      - test_three['diff']['after']['description'] == "test description"
+      - test_three['power_outlet']['name'] == "Power Outlet"
+      - test_three['power_outlet']['device'] == device['key']
+      - test_three['power_outlet']['type'] == "ita-e"
+      - test_three['power_outlet']['power_port'] == power_port['key']
+      - test_three['power_outlet']['feed_leg'] == "B"
+      - test_three['power_outlet']['description'] == "test description"
+      - test_three['msg'] == "power_outlet Power Outlet updated"
+
+- name: "POWER_OUTLET 4: Create Power Outlet for Delete Test"
+  networktocode.nautobot.power_outlet:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Outlet 2
+    device: Device Power Outlet
+    state: present
+  register: test_four
+
+- name: "POWER_OUTLET 4: ASSERT - Create Power Outlet for Delete Test"
+  assert:
+    that:
+      - test_four is changed
+      - test_four['diff']['before']['state'] == "absent"
+      - test_four['diff']['after']['state'] == "present"
+      - test_four['power_outlet']['name'] == "Power Outlet 2"
+      - test_four['power_outlet']['device'] == device['key']
+      - test_four['msg'] == "power_outlet Power Outlet 2 created"
+
+- name: "POWER_OUTLET 5: Delete Power Outlet"
+  networktocode.nautobot.power_outlet:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Outlet 2
+    device: Device Power Outlet
+    state: absent
+  register: test_five
+
+- name: "POWER_OUTLET 5: ASSERT - Delete Power Outlet"
+  assert:
+    that:
+      - test_five is changed
+      - test_five['diff']['before']['state'] == "present"
+      - test_five['diff']['after']['state'] == "absent"
+      - test_five['msg'] == "power_outlet Power Outlet 2 deleted"
+
+- name: "NAUTOBOT 2.3+ TESTS"
+  when: 
+    - "nautobot_version is version('2.3', '>=')"
+  block:
+    - name: "6 - SET ADDITIONAL FACTS"
+      set_fact:
+        power_outlet_module: '{{ lookup(''networktocode.nautobot.lookup'', ''modules'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''q="HooverMaxProModel60"'') }}'
+     
+    - name: "6: Create power outlet with module"
+      networktocode.nautobot.power_outlet:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Test Power Outlet
+        module: HooverMaxProModel60
+        state: present
+      register: test_six
+
+    - name: "6: ASSERT"
+      assert:
+        that:
+          - test_six is changed
+          - test_six['diff']['before']['state'] == "absent"
+          - test_six['diff']['after']['state'] == "present"
+          - test_six['power_outlet']['name'] == "Test Power Outlet"
+          - test_six['power_outlet']['module'] == power_outlet_module['key']
+          - test_six['msg'] == "power_outlet Test Power Outlet created"
+
+    - name: "7: Create duplicate"
+      networktocode.nautobot.power_outlet:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Test Power Outlet
+        module: HooverMaxProModel60
+        state: present
+      register: test_seven
+
+    - name: "7: ASSERT"
+      assert:
+        that:
+          - not test_seven['changed']
+          - test_seven['power_outlet']['name'] == "Test Power Outlet"
+          - test_seven['power_outlet']['module'] == power_outlet_module['key']
+          - test_seven['msg'] == "power_outlet Test Power Outlet already exists"

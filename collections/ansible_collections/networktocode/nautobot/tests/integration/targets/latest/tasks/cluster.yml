@@ -1,0 +1,103 @@
+---
+##
+##
+### PYNAUTOBOT_CLUSTER
+##
+##
+- set_fact:
+    test_cluster_type: "{{ lookup('networktocode.nautobot.lookup', 'cluster-types', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=\"Test Cluster Type\"') }}"
+    test_cluster_group: "{{ lookup('networktocode.nautobot.lookup', 'cluster-groups', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=\"Test Cluster Group\"') }}"
+    test_location: "{{ lookup('networktocode.nautobot.lookup', 'locations', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=\"Child Test Location\" parent=\"Parent Test Location\"') }}"
+    tenant: "{{ lookup('networktocode.nautobot.lookup', 'tenants', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=\"Test Tenant\"') }}"
+    tag_schnozzberry: "{{ lookup('networktocode.nautobot.lookup', 'tags', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=Schnozzberry') }}"
+
+- name: "CLUSTER 1: Necessary info creation"
+  networktocode.nautobot.cluster:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: "Test Cluster One"
+    cluster_type: "Test Cluster Type"
+    state: present
+  register: test_one
+
+- name: "CLUSTER 1: ASSERT - Necessary info creation"
+  assert:
+    that:
+      - test_one is changed
+      - test_one['diff']['before']['state'] == "absent"
+      - test_one['diff']['after']['state'] == "present"
+      - test_one['cluster']['name'] == "Test Cluster One"
+      - test_one['cluster']['cluster_type'] == test_cluster_type['key']
+      - test_one['msg'] == "cluster Test Cluster One created"
+
+- name: "CLUSTER 2: Create duplicate"
+  networktocode.nautobot.cluster:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: "Test Cluster One"
+    cluster_type: "Test Cluster Type"
+    state: present
+  register: test_two
+
+- name: "CLUSTER 2: ASSERT - Create duplicate"
+  assert:
+    that:
+      - not test_two['changed']
+      - test_two['cluster']['name'] == "Test Cluster One"
+      - test_two['cluster']['cluster_type'] == test_cluster_type['key']
+      - test_two['msg'] == "cluster Test Cluster One already exists"
+
+- name: "CLUSTER 3: Update"
+  networktocode.nautobot.cluster:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: "Test Cluster One"
+    cluster_type: "Test Cluster Type"
+    cluster_group: "Test Cluster Group"
+    location:
+      name: "Child Test Location"
+      parent: "Parent Test Location"
+    comments: "Updated cluster"
+    tenant: "Test Tenant"
+    tags:
+      - "Schnozzberry"
+    state: present
+  register: test_three
+
+- name: "CLUSTER 3: ASSERT - Updated"
+  assert:
+    that:
+      - test_three is changed
+      - test_three['diff']['after']['cluster_group'] == test_cluster_group['key']
+      - test_three['diff']['after']['location'] == test_location['key']
+      - test_three['diff']['after']['comments'] == "Updated cluster"
+      - test_three['diff']['after']['tags'][0] == tag_schnozzberry['key']
+      - test_three['diff']['after']['tenant'] == tenant['key']
+      - test_three['cluster']['name'] == "Test Cluster One"
+      - test_three['cluster']['cluster_type'] == test_cluster_type['key']
+      - test_three['cluster']['cluster_group'] == test_cluster_group['key']
+      - test_three['cluster']['location'] == test_location['key']
+      - test_three['cluster']['comments'] == "Updated cluster"
+      - test_three['cluster']['tags'][0] == tag_schnozzberry['key']
+      - test_three['cluster']['tenant'] == tenant['key']
+      - test_three['msg'] == "cluster Test Cluster One updated"
+
+- name: "CLUSTER 4: ASSERT - Delete"
+  networktocode.nautobot.cluster:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: "Test Cluster One"
+    state: absent
+  register: test_four
+
+- name: "CLUSTER 4: ASSERT - Delete"
+  assert:
+    that:
+      - test_four is changed
+      - test_four['cluster']['name'] == "Test Cluster One"
+      - test_four['cluster']['cluster_type'] == test_cluster_type['key']
+      - test_four['cluster']['cluster_group'] == test_cluster_group['key']
+      - test_four['cluster']['location'] == test_location['key']
+      - test_four['cluster']['comments'] == "Updated cluster"
+      - test_four['cluster']['tags'][0] == tag_schnozzberry['key']
+      - test_four['msg'] == "cluster Test Cluster One deleted"

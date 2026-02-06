@@ -1,0 +1,123 @@
+[
+    {
+        "endpoint": "cables",
+        "data": {
+            "type": "cat5"
+        },
+        "expected": {
+            "type": "temp"
+        }
+    },
+    {
+        "endpoint": "devices",
+        "data": {
+            "face": "Front"
+        },
+        "expected": {
+            "face": "temp"
+        }
+    },
+    {
+        "endpoint": "devices",
+        "data": {
+            "face": 1
+        },
+        "expected": {
+            "face": 1
+        }
+    },
+    {
+        "endpoint": "device_types",
+        "data": {
+            "subdevice_role": "Parent"
+        },
+        "expected": {
+            "subdevice_role": "temp"
+        }
+    },
+    {
+        "endpoint": "device_types",
+        "data": {
+            "subdevice_role": "Child"
+        },
+        "expected": {
+            "subdevice_role": "temp"
+        }
+    },
+    {
+        "endpoint": "interfaces",
+        "data": {
+            "form_factor": "1000base-t (1ge)",
+            "mode": "Access"
+        },
+        "expected": {
+            "form_factor": "temp",
+            "mode": "temp"
+        }
+    },
+    {
+        "endpoint": "interfaces",
+        "data": {
+            "mode": 100
+        },
+        "expected": {
+            "mode": 100
+        }
+    },
+    {
+        "endpoint": "ip_addresses",
+        "data": {
+            "type": "dhcp"
+        },
+        "expected": {
+            "type": "temp"
+        }
+    },
+    {
+        "endpoint": "ip_addresses",
+        "data": {
+            "type": 30
+        },
+        "expected": {
+            "type": 30
+        }
+    },
+    {
+        "endpoint": "racks",
+        "data": {
+            "outer_unit": "Inches",
+            "type": "2-post Frame"
+        },
+        "expected": {
+            "outer_unit": "temp",
+            "type": "temp"
+        }
+    },
+    {
+        "endpoint": "racks",
+        "data": {
+            "type": 1100
+        },
+        "expected": {
+            "type": 1100
+        }
+    },
+    {
+        "endpoint": "virtual_machines",
+        "data": {
+            "face": "Front"
+        },
+        "expected": {
+            "face": "temp"
+        }
+    },
+    {
+        "endpoint": "virtual_machines",
+        "data": {
+            "face": 0
+        },
+        "expected": {
+            "face": 0
+        }
+    }
+]

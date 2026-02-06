@@ -1,0 +1,214 @@
+---
+##
+##
+### PYNAUTOBOT_IP_ADDRESS
+##
+##
+- name: "1 - Create IP address within Nautobot with only required information - State: Present"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 192.168.1.10/30
+    status: "Active"
+    state: present
+  register: test_one
+
+- name: "1 - ASSERT"
+  assert:
+    that:
+      - test_one is changed
+      - test_one['diff']['before']['state'] == "absent"
+      - test_one['diff']['after']['state'] == "present"
+      - test_one['msg'] == "ip_address 192.168.1.10/30 created"
+      - test_one['ip_address']['address'] == "192.168.1.10/30"
+
+- name: "2 - Update 192.168.1.10/30"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 192.168.1.10/30
+    description: "Updated ip address"
+    tags:
+      - "Updated"
+    state: present
+  register: test_two
+
+- name: "2 - ASSERT"
+  assert:
+    that:
+      - test_two is changed
+      - test_two['diff']['after']['description'] == "Updated ip address"
+      - test_two['diff']['after']['tags'][0] == tag_updated['key']
+      - test_two['msg'] == "ip_address 192.168.1.10/30 updated"
+      - test_two['ip_address']['address'] == "192.168.1.10/30"
+      - test_two['ip_address']['status'] == active['key']
+      - test_two['ip_address']['tags'][0] == tag_updated['key']
+      - test_two['ip_address']['description'] == "Updated ip address"
+  vars:
+    tag_updated: "{{ lookup('networktocode.nautobot.lookup', 'tags', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=Updated') }}"
+
+- name: "3 - Delete IP - 192.168.1.10 - State: Absent"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 192.168.1.10/30
+    state: absent
+  register: test_three
+
+- name: "3 - ASSERT"
+  assert:
+    that:
+      - test_three is changed
+      - test_three['diff']['before']['state'] == "present"
+      - test_three['diff']['after']['state'] == "absent"
+      - test_three['msg'] == "ip_address 192.168.1.10/30 deleted"
+
+- name: "4 - Create IP in global namespace - 192.168.1.20/30 - State: Present"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 192.168.1.20/30
+    status: "Active"
+    state: present
+  register: test_four
+
+- name: "4 - ASSERT"
+  assert:
+    that:
+      - test_four is changed
+      - test_four['diff']['before']['state'] == "absent"
+      - test_four['diff']['after']['state'] == "present"
+      - test_four['msg'] == "ip_address 192.168.1.20/30 created"
+      - test_four['ip_address']['address'] == "192.168.1.20/30"
+
+- name: "5 - Duplicate IP in global namespace - 192.168.1.20/30 - State: Present"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 192.168.1.20/30
+    status: "Active"
+    state: present
+  register: test_five
+
+- name: "5 - ASSERT"
+  assert:
+    that:
+      - not test_five['changed']
+      - test_five['msg'] == "ip_address 192.168.1.20/30 already exists"
+      - test_five['ip_address']['address'] == "192.168.1.20/30"
+
+- name: "6 - Force Duplicate IP in global namespace - 192.168.1.20/30 - State: New"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 192.168.1.20/30
+    status: "Active"
+    state: new
+  register: test_six
+  ignore_errors: true
+
+- name: "6 - ASSERT"
+  assert:
+    that:
+      - test_six is not changed
+      # Error message changed from IntegrityError to ValidationError in Nautobot 2.2.9
+      # https://github.com/nautobot/nautobot/pull/6031
+      - ("'duplicate key value violates unique constraint' in test_six['msg']") or ("'IP address with this Parent and Host already exists.' in test_six['msg']")
+
+- name: "7 - Create new address with only parent specified - State: new"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    parent: 192.168.0.0/16
+    status: "Active"
+    state: new
+  register: test_seven
+
+- name: "7 - ASSERT"
+  assert:
+    that:
+      - test_seven is changed
+      - test_seven['diff']['before']['state'] == "absent"
+      - test_seven['diff']['after']['state'] == "present"
+      - test_seven['msg'] == "ip_address 192.168.0.1/16 created"
+      - test_seven['ip_address']['address'] == "192.168.0.1/16"
+
+- name: "8 - Create IP address with several specified in namespace Private"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 172.16.1.20/24
+    namespace: Private
+    tenant: Test Tenant
+    status: Reserved
+    role: Loopback
+    type: Host
+    description: Test description
+    tags:
+      - "Schnozzberry"
+    state: present
+  register: test_eight
+
+- set_fact:
+    tag_schnozzberry: "{{ lookup('networktocode.nautobot.lookup', 'tags', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=Schnozzberry') }}"
+    reserved: "{{ lookup('networktocode.nautobot.lookup', 'statuses', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=Reserved') }}"
+    loopback: "{{ lookup('networktocode.nautobot.lookup', 'roles', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=Loopback') }}"
+    parent_prefix: "{{ lookup('networktocode.nautobot.lookup', 'prefixes', api_endpoint=nautobot_url, token=nautobot_token, api_filter='prefix=172.16.0.0/12 namespace=Private') }}"
+    tenant: "{{ lookup('networktocode.nautobot.lookup', 'tenants', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=\"Test Tenant\"') }}"
+
+- name: "8 - ASSERT"
+  assert:
+    that:
+      - test_eight is changed
+      - test_eight['diff']['before']['state'] == "absent"
+      - test_eight['diff']['after']['state'] == "present"
+      - test_eight['msg'] == "ip_address 172.16.1.20/24 created"
+      - test_eight['ip_address']['address'] == "172.16.1.20/24"
+      - test_eight['ip_address']['description'] == "Test description"
+      - test_eight['ip_address']['ip_version'] == 4
+      - test_eight['ip_address']['parent'] == parent_prefix['key']
+      - test_eight['ip_address']['role'] == loopback['key']
+      - test_eight['ip_address']['status'] == reserved['key']
+      - test_eight['ip_address']['tags'][0] == tag_schnozzberry['key']
+      - test_eight['ip_address']['tenant'] == tenant['key']
+
+- name: "9 - Create IP address and assign a nat_inside IP"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 10.10.1.30/16
+    status: "Active"
+    nat_inside:
+      address: 172.16.1.20
+  register: test_nine
+
+- name: "9 - ASSERT"
+  assert:
+    that:
+      - test_nine is changed
+      - test_nine['diff']['before']['state'] == "absent"
+      - test_nine['diff']['after']['state'] == "present"
+      - test_nine['msg'] == "ip_address 10.10.1.30/16 created"
+      - test_nine['ip_address']['address'] == "10.10.1.30/16"
+      - test_nine['ip_address']['ip_version'] == 4
+      - test_nine['ip_address']['nat_inside'] == nat_inside['key']
+  vars:
+    nat_inside: "{{ lookup('networktocode.nautobot.lookup', 'ip-addresses', api_endpoint=nautobot_url, token=nautobot_token, api_filter='address=172.16.1.20/24') }}"
+
+- name: "10 - Create IP address with no mask - State: Present"
+  networktocode.nautobot.ip_address:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    address: 10.120.10.1
+    status: "Active"
+    state: present
+  register: test_ten
+
+- name: "16 - ASSERT"
+  assert:
+    that:
+      - test_ten is changed
+      - test_ten['diff']['before']['state'] == "absent"
+      - test_ten['diff']['after']['state'] == "present"
+      - test_ten['msg'] == "ip_address 10.120.10.1/32 created"
+      - test_ten['ip_address']['address'] == "10.120.10.1/32"

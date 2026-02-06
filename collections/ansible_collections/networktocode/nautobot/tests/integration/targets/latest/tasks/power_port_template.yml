@@ -1,0 +1,212 @@
+---
+# © 2020 Nokia
+# Licensed under the GNU General Public License v3.0 only
+# SPDX-License-Identifier: GPL-3.0-only
+##
+##
+### PYNAUTOBOT_POWER_PORT_TEMPLATE
+##
+##
+- name: "POWER_PORT_TEMPLATE 0: Create device type for testing power ports"
+  networktocode.nautobot.device_type:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    model: Device Type Power Tests
+    manufacturer: Test Manufacturer
+    state: present
+
+- set_fact:
+    device_type: "{{ lookup('networktocode.nautobot.lookup', 'device-types', api_endpoint=nautobot_url, token=nautobot_token, api_filter='model=\"Device Type Power Tests\"') }}"
+
+- name: "POWER_PORT_TEMPLATE 1: Necessary info creation"
+  networktocode.nautobot.power_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Port Template
+    device_type: Device Type Power Tests
+    state: present
+  register: test_one
+
+- name: "POWER_PORT_TEMPLATE 1: ASSERT - Necessary info creation"
+  assert:
+    that:
+      - test_one is changed
+      - test_one['diff']['before']['state'] == "absent"
+      - test_one['diff']['after']['state'] == "present"
+      - test_one['power_port_template']['name'] == "Power Port Template"
+      - test_one['power_port_template']['device_type'] == device_type['key']
+      - test_one['msg'] == "power_port_template Power Port Template created"
+
+- name: "POWER_PORT_TEMPLATE 2: Create duplicate"
+  networktocode.nautobot.power_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Port Template
+    device_type: Device Type Power Tests
+    state: present
+  register: test_two
+
+- name: "POWER_PORT_TEMPLATE 2: ASSERT - Create duplicate"
+  assert:
+    that:
+      - not test_two['changed']
+      - test_two['power_port_template']['name'] == "Power Port Template"
+      - test_two['power_port_template']['device_type'] == device_type['key']
+      - test_two['msg'] == "power_port_template Power Port Template already exists"
+
+- name: "POWER_PORT_TEMPLATE 3: Update power_port_template with other fields"
+  networktocode.nautobot.power_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Port Template
+    device_type: Device Type Power Tests
+    type: ita-e
+    allocated_draw: 10
+    maximum_draw: 20
+    state: present
+  register: test_three
+
+- name: "POWER_PORT_TEMPLATE 3: ASSERT - Update power_port_template with other fields"
+  assert:
+    that:
+      - test_three is changed
+      - test_three['diff']['after']['type'] == "ita-e"
+      - test_three['diff']['after']['allocated_draw'] == 10
+      - test_three['diff']['after']['maximum_draw'] == 20
+      - test_three['power_port_template']['name'] == "Power Port Template"
+      - test_three['power_port_template']['device_type'] == device_type['key']
+      - test_three['power_port_template']['type'] == "ita-e"
+      - test_three['power_port_template']['allocated_draw'] == 10
+      - test_three['power_port_template']['maximum_draw'] == 20
+      - test_three['msg'] == "power_port_template Power Port Template updated"
+
+- name: "POWER_PORT_TEMPLATE 3.1: Update power_port_template with invalid choice value"
+  networktocode.nautobot.power_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Port Template
+    device_type: Device Type Power Tests
+    type: invalid-choice-value
+    allocated_draw: 10
+    maximum_draw: 20
+    state: present
+  register: test_three_dot_one
+  ignore_errors: true
+
+- name: "POWER_PORT_TEMPLATE 3: ASSERT - Update power_port_template with invalid choice value"
+  assert:
+    that:
+      - test_three_dot_one is failed
+      - "'invalid-choice-value was not found as a valid choice for power_port_templates' in test_three_dot_one['msg']"
+
+- name: "POWER_PORT_TEMPLATE 4: Create Power Port Template for Delete Test"
+  networktocode.nautobot.power_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Port Template 2
+    device_type: Device Type Power Tests
+    state: present
+  register: test_four
+
+- name: "POWER_PORT_TEMPLATE 4: ASSERT - Create Power Port Template for Delete Test"
+  assert:
+    that:
+      - test_four is changed
+      - test_four['diff']['before']['state'] == "absent"
+      - test_four['diff']['after']['state'] == "present"
+      - test_four['power_port_template']['name'] == "Power Port Template 2"
+      - test_four['power_port_template']['device_type'] == device_type['key']
+      - test_four['msg'] == "power_port_template Power Port Template 2 created"
+
+- name: "POWER_PORT_TEMPLATE 5: Delete Power Port Template"
+  networktocode.nautobot.power_port_template:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    name: Power Port Template 2
+    device_type: Device Type Power Tests
+    state: absent
+  register: test_five
+
+- name: "POWER_PORT_TEMPLATE 5: ASSERT - Delete Power Port Template"
+  assert:
+    that:
+      - test_five is changed
+      - test_five['diff']['before']['state'] == "present"
+      - test_five['diff']['after']['state'] == "absent"
+      - test_five['msg'] == "power_port_template Power Port Template 2 deleted"
+
+- name: "NAUTOBOT 2.3+ TESTS"
+  when: 
+    - "nautobot_version is version('2.3', '>=')"
+  block:
+    - name: "6 - SET ADDITIONAL FACTS"
+      set_fact:
+        test_module_type: '{{ lookup(''networktocode.nautobot.lookup'', ''module-types'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''model="HooverMaxProModel60"'') }}'
+        
+    - name: "POWER_PORT_TEMPLATE 6: Create power port template on module type"
+      networktocode.nautobot.power_port_template:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Power Port Template 3
+        module_type: HooverMaxProModel60
+        state: present
+      register: test_six
+
+    - name: "POWER_PORT_TEMPLATE 6: ASSERT"
+      assert:
+        that:
+          - test_six is changed
+          - test_six['diff']['before']['state'] == "absent"
+          - test_six['diff']['after']['state'] == "present"
+          - test_six['power_port_template']['name'] == "Power Port Template 3"
+          - test_six['power_port_template']['module_type'] == test_module_type['key']
+          - test_six['msg'] == "power_port_template Power Port Template 3 created"
+
+    - name: "POWER_PORT_TEMPLATE 7: Create duplicate"
+      networktocode.nautobot.power_port_template:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Power Port Template 3
+        module_type: HooverMaxProModel60
+        state: present
+      register: test_seven
+
+    - name: "POWER_PORT_TEMPLATE 7: ASSERT - Create duplicate"
+      assert:
+        that:
+          - not test_seven['changed']
+          - test_seven['power_port_template']['name'] == "Power Port Template 3"
+          - test_seven['power_port_template']['module_type'] == test_module_type['key']
+          - test_seven['msg'] == "power_port_template Power Port Template 3 already exists"
+
+    - name: "POWER_PORT_TEMPLATE 8: Delete Power Port Template on module type"
+      networktocode.nautobot.power_port_template:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Power Port Template 3
+        module_type: HooverMaxProModel60
+        state: absent
+      register: test_eight
+
+    - name: "POWER_PORT_TEMPLATE 8: ASSERT"
+      assert:
+        that:
+          - test_eight is changed
+          - test_eight['diff']['before']['state'] == "present"
+          - test_eight['diff']['after']['state'] == "absent"
+          - test_eight['msg'] == "power_port_template Power Port Template 3 deleted"
+
+    - name: "POWER_PORT_TEMPLATE 9: Delete Power Port Template on module type duplicate"
+      networktocode.nautobot.power_port_template:
+        url: "{{ nautobot_url }}"
+        token: "{{ nautobot_token }}"
+        name: Power Port Template 3
+        module_type: HooverMaxProModel60
+        state: absent
+      register: test_nine
+
+    - name: "POWER_PORT_TEMPLATE 9: ASSERT"
+      assert:
+        that:
+          - not test_nine['changed']
+          - "'already absent' in test_nine['msg']"

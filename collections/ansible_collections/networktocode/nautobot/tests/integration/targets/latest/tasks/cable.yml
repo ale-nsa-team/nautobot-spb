@@ -1,0 +1,267 @@
+---
+# © 2020 Nokia
+# Licensed under the GNU General Public License v3.0 only
+# SPDX-License-Identifier: GPL-3.0-only
+##
+##
+### PYNAUTOBOT_CABLE
+##
+##
+- set_fact:
+    nexus_parent_intf: '{{ lookup(''networktocode.nautobot.lookup'', ''interfaces'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''device="Test Nexus One" name="Ethernet1/1"'') }}'
+    nexus_child_intf: '{{ lookup(''networktocode.nautobot.lookup'', ''interfaces'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''device="Test Nexus Child One" name="Ethernet2/1"'') }}'
+    planned: "{{ lookup('networktocode.nautobot.lookup', 'statuses', api_endpoint=nautobot_url, token=nautobot_token, api_filter='name=Planned') }}"
+
+- name: "CABLE 1: Necessary info creation"
+  networktocode.nautobot.cable:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    termination_a_type: dcim.interface
+    termination_a:
+      device: Test Nexus One
+      name: Ethernet1/1
+    termination_b_type: dcim.interface
+    termination_b:
+      device: Test Nexus Child One
+      name: Ethernet2/1
+    status: "Connected"
+    state: present
+  register: test_one
+
+- name: "CABLE 1: ASSERT - Necessary info creation"
+  assert:
+    that:
+      - test_one is changed
+      - test_one['diff']['before']['state'] == "absent"
+      - test_one['diff']['after']['state'] == "present"
+      - test_one['cable']['termination_a_type'] == "dcim.interface"
+      - test_one['cable']['termination_a_id'] == nexus_parent_intf['key']
+      - test_one['cable']['termination_b_type'] == "dcim.interface"
+      - test_one['cable']['termination_b_id'] == nexus_child_intf['key']
+      - test_one['msg'] == "cable dcim.interface Ethernet1/1 <> dcim.interface Ethernet2/1 created"
+
+- name: "CABLE 2: Create duplicate"
+  networktocode.nautobot.cable:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    termination_a_type: dcim.interface
+    termination_a:
+      device: Test Nexus One
+      name: Ethernet1/1
+    termination_b_type: dcim.interface
+    termination_b:
+      device: Test Nexus Child One
+      name: Ethernet2/1
+    status: "Connected"
+    state: present
+  register: test_two
+
+- name: "CABLE 2: ASSERT - Create duplicate"
+  assert:
+    that:
+      - test_two is not changed
+      - test_two['cable']['termination_a_type'] == "dcim.interface"
+      - test_two['cable']['termination_a_id'] == nexus_parent_intf['key']
+      - test_two['cable']['termination_b_type'] == "dcim.interface"
+      - test_two['cable']['termination_b_id'] == nexus_child_intf['key']
+      - test_two['msg'] == "cable dcim.interface Ethernet1/1 <> dcim.interface Ethernet2/1 already exists"
+
+- name: "CABLE 3: Update Cable with other fields"
+  networktocode.nautobot.cable:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    termination_a_type: dcim.interface
+    termination_a:
+      device: Test Nexus One
+      name: Ethernet1/1
+    termination_b_type: dcim.interface
+    termination_b:
+      device: Test Nexus Child One
+      name: Ethernet2/1
+    type: mmf-om4
+    status: Planned
+    label: label123
+    color: abcdef
+    length: 30
+    length_unit: m
+    state: present
+  register: test_three
+
+- name: "CABLE 3: ASSERT - Update Cable with other fields"
+  assert:
+    that:
+      - test_three is changed
+      - test_three['diff']['after']['type'] == "mmf-om4"
+      - test_three['diff']['after']['status'] == planned['key']
+      - test_three['diff']['after']['label'] == "label123"
+      - test_three['diff']['after']['color'] == "abcdef"
+      - test_three['diff']['after']['length'] == 30
+      - test_three['diff']['after']['length_unit'] == "m"
+      - test_three['cable']['termination_a_type'] == "dcim.interface"
+      - test_three['cable']['termination_a_id'] == nexus_parent_intf['key']
+      - test_three['cable']['termination_b_type'] == "dcim.interface"
+      - test_three['cable']['termination_b_id'] == nexus_child_intf['key']
+      - test_three['cable']['type'] == "mmf-om4"
+      - test_three['cable']['status'] == planned['key']
+      - test_three['cable']['label'] == "label123"
+      - test_three['cable']['color'] == "abcdef"
+      - test_three['cable']['length'] == 30
+      - test_three['cable']['length_unit'] == "m"
+      - test_three['msg'] == "cable dcim.interface Ethernet1/1 <> dcim.interface Ethernet2/1 updated"
+
+- name: "CABLE 3.1: Update Cable without status"
+  networktocode.nautobot.cable:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    termination_a_type: dcim.interface
+    termination_a:
+      device: Test Nexus One
+      name: Ethernet1/1
+    termination_b_type: dcim.interface
+    termination_b:
+      device: Test Nexus Child One
+      name: Ethernet2/1
+    type: mmf-om4
+    label: label1234
+    color: abcdef
+    length: 30
+    length_unit: m
+    state: present
+  register: test_three
+
+- name: "CABLE 3.1: ASSERT - Update Cable without status"
+  assert:
+    that:
+      - test_three is changed
+
+      - test_three['diff']['after']['label'] == "label1234"
+      - test_three['cable']['termination_a_type'] == "dcim.interface"
+      - test_three['cable']['termination_a_id'] == nexus_parent_intf['key']
+      - test_three['cable']['termination_b_type'] == "dcim.interface"
+      - test_three['cable']['termination_b_id'] == nexus_child_intf['key']
+      - test_three['cable']['type'] == "mmf-om4"
+      - test_three['cable']['status'] == planned['key']
+      - test_three['cable']['label'] == "label1234"
+      - test_three['cable']['color'] == "abcdef"
+      - test_three['cable']['length'] == 30
+      - test_three['cable']['length_unit'] == "m"
+      - test_three['msg'] == "cable dcim.interface Ethernet1/1 <> dcim.interface Ethernet2/1 updated"
+
+- name: "CABLE 4: ASSERT - Delete"
+  networktocode.nautobot.cable:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    termination_a_type: dcim.interface
+    termination_a:
+      device: Test Nexus One
+      name: Ethernet1/1
+    termination_b_type: dcim.interface
+    termination_b:
+      device: Test Nexus Child One
+      name: Ethernet2/1
+    state: absent
+  register: test_four
+
+- name: "CABLE 4: ASSERT - Delete"
+  assert:
+    that:
+      - test_four is changed
+      - test_four['diff']['before']['state'] == "present"
+      - test_four['diff']['after']['state'] == "absent"
+      - test_four['msg'] == "cable dcim.interface Ethernet1/1 <> dcim.interface Ethernet2/1 deleted"
+
+- name: "CABLE 5: Connect Console Port and Console Server Port"
+  networktocode.nautobot.cable:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    termination_a_type: dcim.consoleserverport
+    termination_a:
+      name: Test Console Server Port
+      device: test100
+    termination_b_type: dcim.consoleport
+    termination_b:
+      name: Test Console Port
+      device: test100
+    status: "Connected"
+    state: present
+  register: test_five
+
+- name: "CABLE 5: ASSERT - Connect Console Port and Console Server Port"
+  assert:
+    that:
+      - test_five is changed
+      - test_five['diff']['before']['state'] == "absent"
+      - test_five['diff']['after']['state'] == "present"
+      - test_five['cable']['termination_a_type'] == "dcim.consoleserverport"
+      - test_five['cable']['termination_a_id'] == console_server_port['key']
+      - test_five['cable']['termination_b_type'] == "dcim.consoleport"
+      - test_five['cable']['termination_b_id'] == console_port['key']
+      - test_five['msg'] == "cable dcim.consoleserverport Test Console Server Port <> dcim.consoleport Test Console Port created"
+  vars:
+    console_port: '{{ lookup(''networktocode.nautobot.lookup'', ''console-ports'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''device="test100" name="Test Console Port"'') }}'
+    console_server_port: '{{ lookup(''networktocode.nautobot.lookup'', ''console-server-ports'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''device="test100" name="Test Console Server Port"'') }}'
+
+- name: "CABLE 6: Circuits Termination as side A"
+  networktocode.nautobot.cable:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    termination_a_type: circuits.circuittermination
+    termination_a:
+      circuit: "Test Circuit Two"
+      term_side: "A"
+    termination_b_type: dcim.interface
+    termination_b:
+      device: "test100"
+      name: "GigabitEthernet2"
+    status: "Connected"
+    state: present
+  register: test_six
+
+- set_fact:
+    circuit: '{{ lookup(''networktocode.nautobot.lookup'', ''circuits'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''cid="Test Circuit Two"'') }}'
+
+- name: "CABLE 6: ASSERT - Circuits Termination as side A"
+  assert:
+    that:
+      - test_six is changed
+      - test_six['diff']['before']['state'] == "absent"
+      - test_six['diff']['after']['state'] == "present"
+      - test_six['cable']['termination_a_type'] == "circuits.circuittermination"
+      - test_six['cable']['termination_a_id'] == circuit_termination['key']
+      - test_six['cable']['termination_b_type'] == "dcim.interface"
+      - test_six['cable']['termination_b_id'] == interface['key']
+      - test_six['msg'] == "cable circuits.circuittermination Test Circuit Two <> dcim.interface GigabitEthernet2 created"
+  vars:
+    circuit_termination: "{{ lookup('networktocode.nautobot.lookup', 'circuit-terminations', api_endpoint=nautobot_url, token=nautobot_token, api_filter='circuit=' ~ circuit['key'] ~ ' term_side=A') }}"
+    interface: '{{ lookup(''networktocode.nautobot.lookup'', ''interfaces'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''device="test100" name="GigabitEthernet2"'') }}'
+
+- name: "CABLE 7: Issue #320 - dcim.powerport and dcim.poweroutlet"
+  networktocode.nautobot.cable:
+    url: "{{ nautobot_url }}"
+    token: "{{ nautobot_token }}"
+    termination_a_type: dcim.powerport
+    termination_a:
+      device: test100
+      name: Test Power Port
+    termination_b_type: dcim.poweroutlet
+    termination_b:
+      device: TestDeviceR1
+      name: R1 Power Outlet
+    status: "Connected"
+    state: present
+  register: test_seven
+
+- name: "CABLE 7: ASSERT - Issue #320 - dcim.powerport and dcim.poweroutlet"
+  assert:
+    that:
+      - test_seven is changed
+      - test_seven['diff']['before']['state'] == "absent"
+      - test_seven['diff']['after']['state'] == "present"
+      - test_seven['cable']['termination_a_type'] == "dcim.powerport"
+      - test_seven['cable']['termination_a_id'] == cable_test_seven_power_port['key']
+      - test_seven['cable']['termination_b_type'] == "dcim.poweroutlet"
+      - test_seven['cable']['termination_b_id'] == cable_test_seven_power_outlet['key']
+      - test_seven['msg'] == "cable dcim.powerport Test Power Port <> dcim.poweroutlet R1 Power Outlet created"
+  vars:
+    cable_test_seven_power_port: '{{ lookup(''networktocode.nautobot.lookup'', ''power-ports'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''device="test100" name="Test Power Port"'') }}'
+    cable_test_seven_power_outlet: '{{ lookup(''networktocode.nautobot.lookup'', ''power-outlets'', api_endpoint=nautobot_url, token=nautobot_token, api_filter=''device="TestDeviceR1" name="R1 Power Outlet"'') }}'
