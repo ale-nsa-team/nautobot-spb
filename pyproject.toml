@@ -2,7 +2,7 @@
 name = "nautobot-spb"
 version = "0.1"
 description = "SPB Support for Nautobot (Shortest Path Bridging)"
-authors = [{ name = "Lina", email = "linaouali547@gmail.com" }]
+authors = [{ name = "Lina", email = "lina.ouali@al-enterprise.com" }]
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.8"
