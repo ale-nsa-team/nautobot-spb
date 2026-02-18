@@ -3,6 +3,22 @@
 > **Nautobot Plugin** for managing **Shortest Path Bridging (SPB)** network configurations on **ALE OmniSwitch (AOS8)** devices, with automated provisioning via **AWX/Ansible** triggered by Nautobot webhooks.
 
 ---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Data Models](#data-models)
+- [Ansible Roles](#ansible-roles)
+- [Ansible Inventory](#ansible-inventory--nautobot-dynamic-inventory)
+- [Project Structure](#project-structure)
+- [Usage](#usage)
+- [Author](#author)
+
+---
+
 ## Overview
 
 `nautobot-spb` is a Nautobot application plugin that extends the Nautobot DCIM/IPAM platform with full SPB (IEEE 802.1aq) data modeling, UI management, and automated configuration deployment. When a network operator creates or updates an SPB object in Nautobot, a webhook fires an AWX job that pushes the configuration directly to the ALE switches.
@@ -309,4 +325,5 @@ The SPB configuration is fully automated, deployed, and validated using:
 - **Webhooks** — Event-driven triggers
 - **AWX** — Automation Engine
 - **ALE AOS8 switches** — Target network devices
+
 
