@@ -9,7 +9,7 @@
 - [Overview](#overview)
 - [Features](#features)
 - [Requirements](#requirements)
-- [Installation](#installation)
+- [Installation](#Nautobot-Plugin-Installation)
 - [Data Models](#data-models)
 - [Ansible Roles](#ansible-roles)
 - [Ansible Inventory](#ansible-inventory--nautobot-dynamic-inventory)
@@ -58,7 +58,7 @@ Nautobot UI  ──webhook──►  AWX / Ansible  ──SSH──►  ALE Omni
 
 ---
 
-## Installation
+## Nautobot Plugin Installation
 ### 1. Clone the repository
 
 ```bash
@@ -325,5 +325,6 @@ The SPB configuration is fully automated, deployed, and validated using:
 - **Webhooks** — Event-driven triggers
 - **AWX** — Automation Engine
 - **ALE AOS8 switches** — Target network devices
+
 
 
