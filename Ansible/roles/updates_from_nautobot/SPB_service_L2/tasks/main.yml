@@ -1,0 +1,20 @@
+---
+- debug:
+    msg:
+      - "ACTION => {{ action }}"
+      - "DEVICE => {{ device }}"
+      - "SERVICE => {{ service_id }}"
+      - "ISID => {{ isid }}"
+      - "BVLAN => {{ bvlan }}"
+
+- name: Configure SPB service
+  ale.aos8.aos8_config:
+    lines:
+      - "service {{ service_id }} spb isid {{ isid }} bvlan {{ bvlan }}"
+  when: inventory_hostname == device
+
+- name: Save SPB configuration
+  ale.aos8.aos8_config:
+    lines:
+      - "write memory flash-synchro"
+  when: inventory_hostname == device

@@ -1,0 +1,19 @@
+---
+- name: Create the SAP on the port
+  ale.aos8.aos8_config:
+    lines:
+      - "service access port {{ interface }}"
+  when: inventory_hostname == device
+
+- name: Assign service to SAP port
+  ale.aos8.aos8_config:
+    lines:
+      - "service {{ service_id }} sap port {{ interface }}{{ item }}"
+  loop: "{{ encapsulations }}"
+  when: inventory_hostname == device
+
+- name: Save configuration
+  ale.aos8.aos8_config:
+    lines:
+      - "write memory flash-synchro"
+  when: inventory_hostname == device

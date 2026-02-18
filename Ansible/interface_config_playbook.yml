@@ -1,0 +1,28 @@
+---
+- name: Nautobot Webhook SPB Automation
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+  vars:
+    ansible_network_os: ale.aos8.aos8
+    ansible_remote_tmp: /tmp/.ansible/tmp
+  ignore_errors: true
+  tasks:
+    - name: Execute SPB Topology Role
+      import_role:
+        name: updates_from_nautobot/SPB_config_L2
+      when: role == "SPB_TOPOLOGY"
+
+    - name: Execute SPB Service Role
+      import_role:
+        name: updates_from_nautobot/SPB_service_L2
+      when: role == "SPB_SERVICE"
+
+    - name: Execute SPB SAP Role
+      import_role:
+        name: updates_from_nautobot/SPB_SAP
+      when: role == "SPB_SAP"
+
+    - debug:
+        msg: "Webhook executed role {{ role }} on {{ inventory_hostname }}"
+      when: role is defined
