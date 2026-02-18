@@ -18,7 +18,7 @@ Nautobot UI  ──webhook──►  AWX / Ansible  ──SSH──►  ALE Omni
 
 - **Full SPB data model** in Nautobot: BVLANs, Services, SAPs, Interfaces, ISIS instances, IPVPN Bindings & Redistributions, and Topologies
 - **Dedicated SPB navigation tab** in Nautobot (Topology / Backbone / Layer 2 / Layer 3 / SAPs)
-- **Device & Interface detail tabs**: SPB ISIS, SPB Interfaces, SPB Services, SPB Config — directly accessible from existing Nautobot device views
+- **Device & Interface detail tabs**: SPB ISIS, SPB Interfaces, SPB Services, SPB Config directly accessible from existing Nautobot device views
 - **Webhook-enabled models**: all SPB objects trigger change logging and webhook events on create/update/delete
 - **Multi-device / multi-interface forms**: create a service or SAP across multiple devices at once
 - **Auto-creation of BVLANs**: creating a Topology automatically provisions the required Control and Data BVLANs
@@ -83,5 +83,134 @@ sudo systemctl restart nautobot nautobot-worker
 ```
 
 ---
+## Data Models
+
+| Model | Description |
+|---|---|
+| `SPB_Topology` | High-level topology object grouping BVLANs, devices, and interfaces. |
+| `SPB_BVLAN` | Backbone VLAN (control or data). Only one control BVLAN allowed. |
+| `SPB_Service` | SPB L2 service instance, tied to a device, ISID and BVLAN. |
+| `SPB_SAP` | Service Access Point: associates a service with a device port and encapsulation(s). |
+| `SPB_Interface` | Physical interface participating in SPB ISIS. |
+| `SPB_ISIS` | ISIS-SPB instance configuration (bridge priority, SPF/LSP timers, graceful restart). |
+| `SPB_IPVPN_Bind` | Binding between a VRF and an SPB service (L3 over SPB). |
+| `SPB_IPVPN_Redist` | Route redistribution between VRFs/ISIDs. |
+
+> **Note:** BVLANs are automatically created when a Topology is saved and validated. However, the **Control BVLAN must never be changed** after initial deployment modifying it requires reconfiguring every device in the architecture. Similarly, any device or configuration added outside of the Topology workflow must be carefully reviewed to ensure its assignments remain consistent with the existing infrastructure.
+---
+## Ansible Roles
+
+Roles are located under `playbooks/roles/updates_from_nautobot/` and triggered by the main playbook `interface_config_playbook.yml`.
+
+### Role dispatch (webhook `role` variable)
+
+| `role` value | Ansible role invoked | Purpose |
+|---|---|---|
+| `SPB_TOPOLOGY` | `SPB_config_L2` | Configure BVLANs, ISIS, interfaces |
+| `SPB_SERVICE` | `SPB_service_L2` | Create/update an SPB service |
+| `SPB_SAP` | `SPB_SAP` | Create SAP and bind encapsulations |
+
+### Example webhook payload variables
+
+```json
+{
+  "role": "SPB_TOPOLOGY",
+  "topology_name": "DC-CORE",
+  "control_bvlan_id": "1000",
+  "data_bvlan_ids": "2001,2002,2003",
+  "devices": ["switch-01", "switch-02"],
+  "interfaces": ["switch-01:1/1/1", "switch-02:1/1/1"],
+  "iface_type": "p2p",
+  "hello_interval": 9,
+  "hello_multiplier": 3,
+  "metric": 10,
+  "admin_state": true
+}
+```
+
+---
+## Ansible Inventory — Nautobot Dynamic Inventory
+
+Devices are pulled **dynamically from Nautobot** using the `networktocode.nautobot` collection. No static hosts file is needed.
+
+### `inventory/nautobot_sync.yml` — GraphQL inventory plugin
+
+```yaml
+plugin: networktocode.nautobot.gql_inventory
+api_endpoint: "https://<nautobot-ip>/"
+token: "<nautobot-api-token>"
+validate_certs: false
+query:
+  devices:
+    id: null
+    name: null
+    primary_ip4: host
+    platform:
+      napalm_driver
+      network_driver
+compose:
+  ansible_host: primary_ip4.host
+  ansible_network_os: >-
+    {{
+      'ale.aos8.aos8'
+      if platform.napalm_driver == 'aos'
+      else 'unsupported'
+    }}
+  ansible_connection: network_cli
+  ansible_user: "switch-username"
+  ansible_password: "switch-password"
+  ansible_command_timeout: 60
+  ansible_connect_timeout: 90
+group_by:
+  - role.name
+```
+- Devices are grouped by their **Nautobot device role** (`role.name`)
+- `ansible_network_os` is automatically set to `ale.aos8.aos8` for AOS devices based on the Nautobot platform `napalm_driver` field
+
+### Required Ansible collection
+
+```bash
+ansible-galaxy collection install networktocode.nautobot
+```
+
+Or via `requirements.yml`:
+
+```yaml
+collections:
+  - name: networktocode.nautobot
+  - name: kubernetes.core
+    version: ">=2.3.2"
+  - name: operator_sdk.util
+    version: "0.5.0"
+```
+
+### `ansible.cfg`
+
+Key settings used in this project:
+
+```ini
+[defaults]
+inventory             = ./ansible/inventory
+host_key_checking     = False
+forks                 = 15
+gathering             = smart
+stdout_callback       = yaml
+collections_paths     = ./collections
+jinja2_extensions     = jinja2.ext.loopcontrols,jinja2.ext.do
+
+[persistent_connection]
+command_timeout = 45
+
+[ssh_connection]
+ssh_args = -o StrictHostKeyChecking=no
+
+[inventory]
+enable_plugins = networktocode.nautobot.inventory, networktocode.nautobot.gql_inventory, yaml, ini
+```
+
+---
+
+## Project Structure
+
 
 
