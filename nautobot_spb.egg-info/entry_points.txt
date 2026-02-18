@@ -1,2 +1,0 @@
-[nautobot.plugins]
-nautobot_spb = nautobot_spb.plugin:NautobotSPBConfig
