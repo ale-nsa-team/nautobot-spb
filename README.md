@@ -15,7 +15,6 @@
 - [Ansible Inventory](#ansible-inventory--nautobot-dynamic-inventory)
 - [Project Structure](#project-structure)
 - [Usage](#usage)
-- [Author](#author)
 
 ---
 
@@ -325,6 +324,7 @@ The SPB configuration is fully automated, deployed, and validated using:
 - **Webhooks** — Event-driven triggers
 - **AWX** — Automation Engine
 - **ALE AOS8 switches** — Target network devices
+
 
 
 
