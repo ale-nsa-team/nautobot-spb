@@ -16,7 +16,7 @@ Nautobot UI  ──webhook──►  AWX / Ansible  ──SSH──►  ALE Omni
 
 ## Features
 
-- **Full SPB data model** in Nautobot: BVLANs, Services, SAPs, SDPs, Interfaces, ISIS instances, IPVPN Bindings & Redistributions, and Topologies
+- **Full SPB data model** in Nautobot: BVLANs, Services, SAPs, Interfaces, ISIS instances, IPVPN Bindings & Redistributions, and Topologies
 - **Dedicated SPB navigation tab** in Nautobot (Topology / Backbone / Layer 2 / Layer 3 / SAPs)
 - **Device & Interface detail tabs**: SPB ISIS, SPB Interfaces, SPB Services, SPB Config — directly accessible from existing Nautobot device views
 - **Webhook-enabled models**: all SPB objects trigger change logging and webhook events on create/update/delete
@@ -83,4 +83,5 @@ sudo systemctl restart nautobot nautobot-worker
 ```
 
 ---
+
 
