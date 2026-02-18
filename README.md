@@ -212,5 +212,101 @@ enable_plugins = networktocode.nautobot.inventory, networktocode.nautobot.gql_in
 
 ## Project Structure
 
+```
+nautobot_spb/
+├── __init__.py          # NautobotAppConfig (plugin entry point)
+├── models.py            # Django ORM models for all SPB objects
+├── forms.py             # Create/edit/filter/CSV forms
+├── views.py             # List, detail, add, edit, delete views
+├── tables.py            # django-tables2 table definitions
+├── urls.py              # URL routing for all SPB views
+├── navigation.py        # Nautobot nav menu (SPB tab)
+├── extend.py            # Device & Interface detail tab extensions
+├── registration.py      # Webhook & change logging feature registration
+├── templates/           # Jinja2 HTML templates
+├── api/                 # REST API (serializers, views, URLs)
+└── migrations/          # Django database migrations
 
+playbooks/
+├── interface_config_playbook.yml          # Main dispatcher playbook
+└── roles/updates_from_nautobot/
+    ├── SPB_config_L2/tasks/main.yaml      # Topology role
+    ├── SPB_service_L2/tasks/main.yml      # Service role
+    └── SPB_SAP/tasks/main.yml             # SAP role
+
+ansible/
+├── ansible.cfg                            # Ansible global configuration
+├── requirements.yml                       # Collection dependencies
+└── inventory/
+    ├── nautobot_sync.yml                  # Dynamic inventory (Nautobot GQL plugin)
+    └── group_vars/
+        └── all.yml                        # Global variables
+```
+
+---
+
+## Usage
+
+### Prerequisites — Verify Initial State
+
+Before any configuration, ensure all switches are running with **no existing SPB configuration**.
+
+### Prerequisites — AWX & Webhooks Setup
+
+Before configuring anything in Nautobot, ensure AWX is ready:
+
+In AWX, the following must already exist:
+- A **Project** linked to the Git repository
+- An **Execution Environment** containing the `ale.aos8` collection
+- A **Job Template** (the template ID is visible in the AWX URL)
+
+In Nautobot, configure **three dedicated webhooks** (one per object type: Topology, Service, SAP).
+Each webhook includes a **Body Template** that passes dynamic variables to AWX via REST API,
+and targets a specific Job Template ID.
+
+---
+
+### Step 1 — SPB Topology (Backbone)
+
+Navigate to **SPB → Topology → SPB Topologies → Add** and define:
+- Topology name and optional description
+- Control BVLAN
+- Data BVLANs *(must be identical across all devices)*
+- SPB interfaces for each switch
+
+Once saved, the webhook triggers AWX automatically. The job starts, receives all parameters
+from Nautobot, and pushes the backbone configuration to all switches.
+
+---
+
+### Step 2 — SPB Services
+
+Navigate to **SPB → Layer 2 → SPB Services → Add** and define:
+- Service ID
+- ISID
+- Target devices
+
+Saving triggers the AWX webhook again. The job template deploys the service configuration
+to all selected switches.
+
+---
+
+### Step 3 — SAP Configuration
+
+Navigate to **SPB → SAPs → SAPs → Add** and define the access port(s) and encapsulation(s).
+Nautobot triggers AWX once more to push the SAP configuration to the target devices.
+
+
+---
+
+### Validation
+
+Ping between the two client machines connected on your devices
+Successful connectivity confirms the SPB backbone, services, and SAPs are fully operational.
+
+The SPB configuration is fully automated, deployed, and validated using:
+- **Nautobot** — Source of Truth
+- **Webhooks** — Event-driven triggers
+- **AWX** — Automation Engine
+- **ALE AOS8 switches** — Target network devices
 
